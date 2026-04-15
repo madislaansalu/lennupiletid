@@ -1,18 +1,13 @@
 import os
 import json
 import datetime
-from amadeus import Client, ResponseError
+import requests
 
-amadeus = Client(
-    client_id=os.environ["AMADEUS_API_KEY"],
-    client_secret=os.environ["AMADEUS_API_SECRET"]
-)
-
+API_KEY = os.environ["SERPAPI_KEY"]
 ORIGIN = "TLL"
 DESTINATIONS = ["NRT", "HND"]  # Tokyo Narita + Haneda
-DATES = [f"2027-04-{d:02d}" for d in range(1, 11)]  # 1.–10. aprill 2027
-CABINS = ["BUSINESS", "PREMIUM_ECONOMY"]
-
+DATES = [f"2027-04-{d:02d}" for d in range(1, 11)]
+CABINS = {"BUSINESS": 3, "PREMIUM_ECONOMY": 2}
 DATA_FILE = "data/prices.json"
 
 def load_existing():
@@ -21,40 +16,41 @@ def load_existing():
             return json.load(f)
     return {"updated": "", "entries": []}
 
-def fetch_offers(destination, date, cabin):
+def fetch(destination, date, cabin_label, cabin_code):
+    params = {
+        "engine": "google_flights",
+        "departure_id": ORIGIN,
+        "arrival_id": destination,
+        "outbound_date": date,
+        "travel_class": cabin_code,
+        "currency": "EUR",
+        "hl": "et",
+        "api_key": API_KEY
+    }
     try:
-        response = amadeus.shopping.flight_offers_search.get(
-            originLocationCode=ORIGIN,
-            destinationLocationCode=destination,
-            departureDate=date,
-            adults=1,
-            travelClass=cabin,
-            currencyCode="EUR",
-            max=5
-        )
-        offers = []
-        for offer in response.data:
-            price = float(offer["price"]["total"])
-            airlines = list({
-                seg["carrierCode"]
-                for itin in offer["itineraries"]
-                for seg in itin["segments"]
-            })
-            duration = offer["itineraries"][0]["duration"]
-            stops = sum(
-                len(itin["segments"]) - 1
-                for itin in offer["itineraries"]
-            )
-            offers.append({
-                "price": price,
-                "airlines": airlines,
-                "duration": duration,
-                "stops": stops
-            })
-        return offers
-    except ResponseError as e:
-        print(f"Viga {destination} {date} {cabin}: {e}")
-        return []
+        r = requests.get("https://serpapi.com/search", params=params, timeout=30)
+        r.raise_for_status()
+        data = r.json()
+        flights = data.get("best_flights", []) or data.get("other_flights", [])
+        if not flights:
+            return None
+        best = flights[0]
+        legs = best.get("flights", [])
+        airlines = list({leg.get("airline", "") for leg in legs})
+        duration = best.get("total_duration", 0)
+        stops = len(legs) - 1
+        price = best.get("price")
+        if not price:
+            return None
+        return {
+            "price": float(price),
+            "airlines": airlines,
+            "duration_min": duration,
+            "stops": stops
+        }
+    except Exception as e:
+        print(f"Viga {destination} {date} {cabin_label}: {e}")
+        return None
 
 def main():
     data = load_existing()
@@ -63,22 +59,22 @@ def main():
 
     for date in DATES:
         for destination in DESTINATIONS:
-            for cabin in CABINS:
-                offers = fetch_offers(destination, date, cabin)
-                if offers:
-                    best = min(offers, key=lambda x: x["price"])
-                    new_entries.append({
+            for cabin_label, cabin_code in CABINS.items():
+                result = fetch(destination, date, cabin_label, cabin_code)
+                if result:
+                    entry = {
                         "checked": today,
                         "flight_date": date,
                         "destination": destination,
-                        "cabin": cabin,
-                        "best_price": best["price"],
-                        "airlines": best["airlines"],
-                        "duration": best["duration"],
-                        "stops": best["stops"],
-                        "all_offers": offers
-                    })
-                    print(f"{date} {destination} {cabin}: {best['price']} EUR")
+                        "cabin": cabin_label,
+                        "best_price": result["price"],
+                        "airlines": result["airlines"],
+                        "duration_min": result["duration_min"],
+                        "stops": result["stops"]
+                    }
+                    new_entries.append(entry)
+                    h, m = divmod(result["duration_min"], 60)
+                    print(f"{date} {destination} {cabin_label}: {result['price']} EUR | {h}h{m}m | {result['airlines']}")
 
     data["updated"] = today
     data["entries"].extend(new_entries)
@@ -86,7 +82,7 @@ def main():
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-    print(f"Salvestatud {len(new_entries)} kirjet.")
+    print(f"\nSalvestatud {len(new_entries)} kirjet.")
 
 if __name__ == "__main__":
     main()

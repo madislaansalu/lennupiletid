@@ -3,93 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TLL → TYO lennuhinnad 2027</title>
+<title>TLL → Tokyo lennuhinnad · Aprill 2027</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: system-ui, sans-serif; background: #f4f6f9; color: #1a1a2e; }
+body { font-family: system-ui, sans-serif; background: #f0f2f5; color: #1a1a2e; }
 header {
   background: #1a1a2e; color: #fff;
-  padding: 1rem 2rem;
+  padding: 1.1rem 2rem;
   display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .5rem;
 }
-header h1 { font-size: 1.2rem; }
-.updated { font-size: .8rem; opacity: .6; }
-.wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+header h1 { font-size: 1.15rem; letter-spacing: .01em; }
+.updated { font-size: .78rem; opacity: .55; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
 .filters {
-  display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+  display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+  background: #fff; padding: 1rem 1.2rem; border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
 }
-.filters label { font-size: .85rem; font-weight: 600; color: #555; }
+.filters label { font-size: .83rem; font-weight: 600; color: #555; display: flex; align-items: center; gap: .4rem; }
 .filters select {
-  margin-left: .4rem; padding: 6px 10px;
-  border: 1px solid #ccc; border-radius: 6px;
-  font-size: .9rem; background: #fff;
+  padding: 5px 10px; border: 1px solid #d0d5dd;
+  border-radius: 6px; font-size: .88rem; background: #fff; color: #1a1a2e;
 }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+
+.summary {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: #fff; border-radius: 10px; padding: 1rem 1.2rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+}
+.stat-label { font-size: .75rem; color: #888; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
+.stat-val { font-size: 1.6rem; font-weight: 700; }
+.stat-sub { font-size: .78rem; color: #777; margin-top: .2rem; }
+
+.chart-wrap {
+  background: #fff; border-radius: 10px; padding: 1.3rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07); margin-bottom: 1.5rem;
+}
+.chart-wrap h2 { font-size: .92rem; color: #444; margin-bottom: 1rem; font-weight: 600; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1rem; }
 .card {
-  background: #fff; border-radius: 12px;
-  padding: 1.2rem 1.4rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,.07);
-  border-left: 4px solid #ccc;
+  background: #fff; border-radius: 10px; padding: 1.1rem 1.3rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  border-top: 3px solid #ccc;
 }
 .card.BUSINESS { border-color: #1a1a2e; }
 .card.PREMIUM_ECONOMY { border-color: #c84b31; }
-.card-date { font-size: .75rem; color: #888; margin-bottom: .3rem; }
-.card-price { font-size: 2rem; font-weight: 700; margin-bottom: .3rem; }
-.card-cabin {
-  display: inline-block; font-size: .7rem; font-weight: 700;
-  padding: 2px 8px; border-radius: 20px; margin-bottom: .5rem;
-  text-transform: uppercase; letter-spacing: .05em;
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .5rem; }
+.card-date { font-size: .78rem; color: #888; }
+.card-badge {
+  font-size: .65rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 20px; text-transform: uppercase; letter-spacing: .05em;
 }
-.BUSINESS .card-cabin { background: #1a1a2e; color: #fff; }
-.PREMIUM_ECONOMY .card-cabin { background: #c84b31; color: #fff; }
-.card-detail { font-size: .82rem; color: #555; line-height: 1.8; }
-.chart-wrap {
-  background: #fff; border-radius: 12px;
-  padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.07);
-  margin-bottom: 2rem;
-}
-.chart-wrap h2 { font-size: 1rem; margin-bottom: 1rem; color: #333; }
-.empty { text-align: center; padding: 4rem; color: #aaa; font-size: 1rem; }
+.BUSINESS .card-badge { background: #1a1a2e; color: #fff; }
+.PREMIUM_ECONOMY .card-badge { background: #c84b31; color: #fff; }
+.card-price { font-size: 1.8rem; font-weight: 700; margin-bottom: .6rem; }
+.card-detail { font-size: .8rem; color: #666; line-height: 1.9; }
+
+.empty { text-align: center; padding: 4rem; color: #aaa; }
+section-title { display: block; font-size: .85rem; font-weight: 700; color: #444; margin-bottom: .8rem; }
 </style>
 </head>
 <body>
 <header>
-  <h1>✈ TLL → Tokyo · Aprill 2027</h1>
+  <h1>✈ Tallinn → Tokyo &nbsp;·&nbsp; Aprill 2027</h1>
   <span class="updated" id="updated">Laen...</span>
 </header>
+
 <div class="wrap">
   <div class="filters">
-    <div>
-      <label>Klass:
-        <select id="cabinFilter" onchange="render()">
-          <option value="ALL">Kõik</option>
-          <option value="BUSINESS">Business</option>
-          <option value="PREMIUM_ECONOMY">Premium Economy</option>
-        </select>
-      </label>
-    </div>
-    <div>
-      <label>Lennujaam:
-        <select id="destFilter" onchange="render()">
-          <option value="ALL">Mõlemad (NRT + HND)</option>
-          <option value="NRT">Tokyo Narita (NRT)</option>
-          <option value="HND">Tokyo Haneda (HND)</option>
-        </select>
-      </label>
-    </div>
-    <div>
-      <label>Kuupäev:
-        <select id="dateFilter" onchange="render()">
-          <option value="ALL">Kõik kuupäevad</option>
-        </select>
-      </label>
-    </div>
+    <label>Klass:
+      <select id="cabinFilter" onchange="render()">
+        <option value="ALL">Kõik</option>
+        <option value="BUSINESS">Business</option>
+        <option value="PREMIUM_ECONOMY">Premium Economy</option>
+      </select>
+    </label>
+    <label>Lennujaam:
+      <select id="destFilter" onchange="render()">
+        <option value="ALL">NRT + HND</option>
+        <option value="NRT">Narita (NRT)</option>
+        <option value="HND">Haneda (HND)</option>
+      </select>
+    </label>
+    <label>Kuupäev:
+      <select id="dateFilter" onchange="render()">
+        <option value="ALL">Kõik kuupäevad</option>
+      </select>
+    </label>
   </div>
 
+  <div class="summary" id="summary"></div>
+
   <div class="chart-wrap">
-    <h2>Parimate hindade trend (viimane kontroll per kuupäev)</h2>
-    <canvas id="chart" height="80"></canvas>
+    <h2>Hinnatrend kuupäevade lõikes (viimane kontroll)</h2>
+    <canvas id="chart" height="70"></canvas>
   </div>
 
   <div class="cards" id="cards"></div>
@@ -97,6 +111,138 @@ header h1 { font-size: 1.2rem; }
 
 <script>
 let allData = [];
+let chartInstance = null;
+
+function fmtDur(min) {
+  if (!min) return "—";
+  const h = Math.floor(min / 60), m = min % 60;
+  return h + "h " + m + "min";
+}
+
+function latestPerKey(entries) {
+  const map = {};
+  entries.forEach(e => {
+    const key = `${e.flight_date}|${e.destination}|${e.cabin}`;
+    if (!map[key] || e.checked > map[key].checked) map[key] = e;
+  });
+  return Object.values(map);
+}
+
+function filtered() {
+  const cabin = document.getElementById("cabinFilter").value;
+  const dest = document.getElementById("destFilter").value;
+  const date = document.getElementById("dateFilter").value;
+  return latestPerKey(allData).filter(e =>
+    (cabin === "ALL" || e.cabin === cabin) &&
+    (dest === "ALL" || e.destination === dest) &&
+    (date === "ALL" || e.flight_date === date)
+  ).sort((a, b) => a.flight_date.localeCompare(b.flight_date) || a.cabin.localeCompare(b.cabin));
+}
+
+function renderSummary(data) {
+  if (!data.length) { document.getElementById("summary").innerHTML = ""; return; }
+  const prices = data.map(e => e.best_price);
+  const best = Math.min(...prices);
+  const worst = Math.max(...prices);
+  const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+  const bestEntry = data.find(e => e.best_price === best);
+
+  document.getElementById("summary").innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Parim hind</div>
+      <div class="stat-val">${best.toLocaleString("et-EE")} €</div>
+      <div class="stat-sub">${bestEntry.flight_date} · ${bestEntry.destination} · ${bestEntry.cabin === "BUSINESS" ? "Business" : "Prem. Eco"}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Keskmine hind</div>
+      <div class="stat-val">${avg.toLocaleString("et-EE")} €</div>
+      <div class="stat-sub">filtrite põhjal</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Kõrgeim hind</div>
+      <div class="stat-val">${worst.toLocaleString("et-EE")} €</div>
+      <div class="stat-sub">filtrite põhjal</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Kirjeid kokku</div>
+      <div class="stat-val">${data.length}</div>
+      <div class="stat-sub">aktiivse filtri all</div>
+    </div>
+  `;
+}
+
+function renderChart() {
+  const dates = [...new Set(allData.map(e => e.flight_date))].sort();
+  const dest = document.getElementById("destFilter").value;
+
+  const bestPerDate = (cabin) => dates.map(date => {
+    const entries = latestPerKey(allData).filter(e =>
+      e.flight_date === date && e.cabin === cabin &&
+      (dest === "ALL" || e.destination === dest)
+    );
+    if (!entries.length) return null;
+    return Math.min(...entries.map(e => e.best_price));
+  });
+
+  const ctx = document.getElementById("chart").getContext("2d");
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: dates,
+      datasets: [
+        {
+          label: "Business",
+          data: bestPerDate("BUSINESS"),
+          borderColor: "#1a1a2e",
+          backgroundColor: "rgba(26,26,46,.08)",
+          pointBackgroundColor: "#1a1a2e",
+          tension: 0.3, spanGaps: true, borderWidth: 2
+        },
+        {
+          label: "Premium Economy",
+          data: bestPerDate("PREMIUM_ECONOMY"),
+          borderColor: "#c84b31",
+          backgroundColor: "rgba(200,75,49,.08)",
+          pointBackgroundColor: "#c84b31",
+          tension: 0.3, spanGaps: true, borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "top" } },
+      scales: { y: { ticks: { callback: v => v + " €" } } }
+    }
+  });
+}
+
+function render() {
+  const data = filtered();
+  renderSummary(data);
+  renderChart();
+
+  const container = document.getElementById("cards");
+  if (!data.length) {
+    container.innerHTML = '<p class="empty">Andmeid ei leitud. Skript pole veel jooksnud.</p>';
+    return;
+  }
+  container.innerHTML = data.map(e => `
+    <div class="card ${e.cabin}">
+      <div class="card-top">
+        <div class="card-date">${e.flight_date} · ${e.destination === "NRT" ? "Tokyo Narita" : "Tokyo Haneda"}</div>
+        <span class="card-badge">${e.cabin === "BUSINESS" ? "Business" : "Prem. Eco"}</span>
+      </div>
+      <div class="card-price">${e.best_price.toLocaleString("et-EE")} €</div>
+      <div class="card-detail">
+        ✈ ${e.airlines.join(", ")}<br>
+        ⏱ ${fmtDur(e.duration_min)}<br>
+        🔁 ${e.stops === 0 ? "Otselend" : e.stops + " vahemaandumist"}<br>
+        📅 Kontrollitud: ${e.checked}
+      </div>
+    </div>
+  `).join("");
+}
 
 async function loadData() {
   try {
@@ -106,7 +252,6 @@ async function loadData() {
     document.getElementById("updated").textContent =
       json.updated ? "Uuendatud: " + json.updated : "Andmed puuduvad";
 
-    // populate date filter
     const dates = [...new Set(allData.map(e => e.flight_date))].sort();
     const sel = document.getElementById("dateFilter");
     dates.forEach(d => {
@@ -116,98 +261,11 @@ async function loadData() {
     });
 
     render();
-    renderChart();
   } catch(e) {
     document.getElementById("cards").innerHTML =
       '<p class="empty">Andmeid ei leitud. Skript pole veel jooksnud.</p>';
+    document.getElementById("updated").textContent = "Andmed puuduvad";
   }
-}
-
-function filtered() {
-  const cabin = document.getElementById("cabinFilter").value;
-  const dest = document.getElementById("destFilter").value;
-  const date = document.getElementById("dateFilter").value;
-
-  // latest entry per (flight_date, destination, cabin)
-  const map = {};
-  allData.forEach(e => {
-    const key = `${e.flight_date}|${e.destination}|${e.cabin}`;
-    if (!map[key] || e.checked > map[key].checked) map[key] = e;
-  });
-
-  return Object.values(map).filter(e =>
-    (cabin === "ALL" || e.cabin === cabin) &&
-    (dest === "ALL" || e.destination === dest) &&
-    (date === "ALL" || e.flight_date === date)
-  ).sort((a, b) => a.flight_date.localeCompare(b.flight_date) || a.cabin.localeCompare(b.cabin));
-}
-
-function render() {
-  const data = filtered();
-  const container = document.getElementById("cards");
-  if (!data.length) {
-    container.innerHTML = '<p class="empty">Andmeid ei leitud.</p>';
-    return;
-  }
-  container.innerHTML = data.map(e => `
-    <div class="card ${e.cabin}">
-      <div class="card-date">${e.flight_date} · ${e.destination}</div>
-      <div class="card-price">${e.best_price.toLocaleString("et-EE")} €</div>
-      <span class="card-cabin">${e.cabin === "BUSINESS" ? "Business" : "Premium Economy"}</span>
-      <div class="card-detail">
-        ✈ ${e.airlines.join(", ")}<br>
-        ⏱ ${e.duration.replace("PT","").toLowerCase()}<br>
-        🔁 ${e.stops === 0 ? "Otselend" : e.stops + " vahemaandumist"}<br>
-        📅 Kontrollitud: ${e.checked}
-      </div>
-    </div>
-  `).join("");
-}
-
-function renderChart() {
-  const dates = [...new Set(allData.map(e => e.flight_date))].sort();
-
-  const bestPerDate = (cabin) => dates.map(date => {
-    const entries = allData.filter(e => e.flight_date === date && e.cabin === cabin);
-    if (!entries.length) return null;
-    const latest = entries.reduce((a, b) => a.checked > b.checked ? a : b);
-    return latest.best_price;
-  });
-
-  const ctx = document.getElementById("chart").getContext("2d");
-  new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: dates,
-      datasets: [
-        {
-          label: "Business",
-          data: bestPerDate("BUSINESS"),
-          borderColor: "#1a1a2e",
-          backgroundColor: "rgba(26,26,46,.1)",
-          tension: 0.3,
-          spanGaps: true
-        },
-        {
-          label: "Premium Economy",
-          data: bestPerDate("PREMIUM_ECONOMY"),
-          borderColor: "#c84b31",
-          backgroundColor: "rgba(200,75,49,.1)",
-          tension: 0.3,
-          spanGaps: true
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: "top" } },
-      scales: {
-        y: {
-          ticks: { callback: v => v + " €" }
-        }
-      }
-    }
-  });
 }
 
 loadData();
